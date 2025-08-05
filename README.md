@@ -9,3 +9,5 @@ The goal
     b. Current teams that will/are playing
     c. Scores of match that are being played
     d. City, Country, Stadium names
+
+Access: https://npnz88.github.io/cs50x_final/
