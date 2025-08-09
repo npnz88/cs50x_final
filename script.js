@@ -1,31 +1,28 @@
+
+
 const API_KEY = '35090078-7752-4fe9-acf2-1f2ac99d4226';
 const API_URL = `https://api.cricapi.com/v1/series?apikey=${API_KEY}&offset=0`;
 
 const container = document.getElementById('series-container');
 
-// Map short month names to numbers
+// --- TOP OF FILE ---
 const MONTHS = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
 
 function parseSeriesDate(dateStr, fallbackYear) {
-  // If it's ISO-like (YYYY-MM-DD), parse explicitly
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
   if (iso) {
     const [_, y, m, d] = iso;
     return new Date(Date.UTC(+y, +m - 1, +d));
   }
-
-  // If it's like "Aug 10" (no year)
   const md = /^([A-Za-z]{3})\s+(\d{1,2})$/.exec(dateStr);
   if (md && fallbackYear) {
     const month = MONTHS[md[1].toLowerCase()];
     const day = +md[2];
     return new Date(Date.UTC(fallbackYear, month, day));
   }
-
-  // Fallback (avoid implicit parsing)
   return new Date(NaN);
 }
-
+// --- then your fetch(...) code below ---
 
 fetch(API_URL)
   .then(res => res.json())
@@ -68,6 +65,24 @@ fetch(API_URL)
     console.log("Start:", start.toUTCString(), "End:", end.toUTCString(), "Active:", isActive);
 
     });
+
+    // Build the tile (basic styles for now)
+    const tile = document.createElement('div');
+    tile.style.border = '1px solid #ccc';
+    tile.style.padding = '10px';
+    tile.style.margin = '10px 0';
+    tile.style.borderRadius = '8px';
+    tile.style.backgroundColor = isActive ? '#e6ffe6' : '#f0f0f0';
+
+    tile.innerHTML = `
+      <h3>${series.name}</h3>
+      <p>Start: ${series.startDate} | End: ${series.endDate}</p>
+      <p>Matches: ${series.matches}</p>
+      ${isActive ? '<p style="color: green; font-weight: bold;">ACTIVE NOW</p>' : ''}
+    `;
+
+    container.appendChild(tile);
+
 
   })
   .catch(err => {
