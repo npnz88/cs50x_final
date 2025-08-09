@@ -9,27 +9,44 @@ fetch(API_URL)
     const today = new Date();
     const currentYear = today.getFullYear();
 
-    const latestSeries = data.data.slice(0, 10); // Show latest 10 series
+    console.log("Today's Date:", today.toDateString());
+    console.log("Raw API data:", data);
+
+    const latestSeries = data.data.slice(0, 10);
 
     latestSeries.forEach(series => {
-      const tile = document.createElement('div');
+      // Debug: See exactly what dates are returned
+      console.log(`\n=== ${series.name} ===`);
+      console.log("Raw startDate:", series.startDate);
+      console.log("Raw endDate:", series.endDate);
 
-      // Combine year with start/end dates
-      const startDateStr = `${series.startDate} ${currentYear}`;
-      const endDateStr = `${series.endDate} ${currentYear}`;
+      // Create Date objects
+      let start;
+      let end;
 
-      const start = new Date(startDateStr);
-      const end = new Date(endDateStr);
+      // Detect if API already has a year in date string
+      if (/\d{4}/.test(series.startDate)) {
+        start = new Date(series.startDate);
+        end = new Date(series.endDate);
+      } else {
+        start = new Date(`${series.startDate} ${currentYear}`);
+        end = new Date(`${series.endDate} ${currentYear}`);
+      }
 
-      // Fallback if date parsing fails
+      console.log("Parsed start Date object:", start);
+      console.log("Parsed end Date object:", end);
+
       const isActive = !isNaN(start) && !isNaN(end) && today >= start && today <= end;
 
-      // Apply styles
+      console.log("Is Active?", isActive);
+
+      // Build the tile
+      const tile = document.createElement('div');
       tile.style.border = '1px solid #ccc';
       tile.style.padding = '10px';
       tile.style.margin = '10px 0';
       tile.style.borderRadius = '8px';
-      tile.style.backgroundColor = isActive ? '#e6ffe6' : '#f0f0f0'; // Green vs grey
+      tile.style.backgroundColor = isActive ? '#e6ffe6' : '#f0f0f0';
 
       tile.innerHTML = `
         <h3>${series.name}</h3>
