@@ -2,13 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cricket Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🏏 Current Cricket Series</h1>
-  <div id="series-container"></div>
+  <main class="page">
+    <h1>🏏 Current / Recent Cricket Series</h1>
 
-  <script src="script.js"></script>
+    <div id="series-container" class="grid"></div>
+
+    <footer class="footer">
+      <small>
+        Data via CricAPI · <span id="diag">Loading…</span>
+      </small>
+    </footer>
+  </main>
+
+  <!-- Tip: while testing, bump v number to bust cache -->
+  <script src="script.js?v=1"></script>
 </body>
 </html>
