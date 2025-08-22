@@ -7,6 +7,9 @@ const container = document.getElementById('series-container');
 // ---- helpers ----
 const MONTHS = { jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11 };
 
+const diagEl = document.getElementById('diag');
+
+
 function parseSeriesDate(dateStr, fallbackYear) {
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec((dateStr || '').trim());
   if (iso) {
@@ -39,10 +42,13 @@ function renderSeries(payload) {
 
   if (!payload || !Array.isArray(payload.data)) {
     container.innerHTML = `<pre style="color:#c33;background:#222;padding:8px;border-radius:6px">
-Unexpected JSON shape:
-${JSON.stringify(payload, null, 2)}</pre>`;
+    Unexpected JSON shape:
+    ${JSON.stringify(payload, null, 2)}</pre>`;
     return;
   }
+// After validating payload.data
+  diagEl && (diagEl.textContent = `Series returned: ${payload.data.length}`);
+
 
   const latestSeries = payload.data.slice(0, 10);
   const todayUTC = todayUTCDateOnly();
@@ -56,22 +62,34 @@ ${JSON.stringify(payload, null, 2)}</pre>`;
     }
     const isActive = !isNaN(start) && !isNaN(end) && todayUTC >= start && todayUTC <= end;
 
+    // Build the tile (INSIDE the forEach)
     const tile = document.createElement('div');
-    tile.style.border = '1px solid #ccc';
-    tile.style.padding = '10px';
+    tile.style.border = '1px solid #2a2f3b';
+    tile.style.padding = '12px 14px';
     tile.style.margin = '10px 0';
-    tile.style.borderRadius = '8px';
-    tile.style.backgroundColor = isActive ? '#e6ffe6' : '#f0f0f0';
+    tile.style.borderRadius = '12px';
+
+    // Use dark background for inactive; soft green for active
+    tile.style.backgroundColor = isActive ? '#113b1b' : '#141922';
+    // Force readable text on both backgrounds
+    tile.style.color = '#e6e8ee';
 
     tile.innerHTML = `
-      <h3>${series.name}</h3>
-      <p>Start: ${series.startDate ?? '—'} | End: ${series.endDate ?? '—'}</p>
-      <p>Matches: ${series.matches ?? '—'}</p>
-      ${isActive ? '<p style="color: green; font-weight: bold;">ACTIVE NOW</p>' : ''}
+      <h3 style="margin: 0 0 6px 0; font-weight:600">${series.name}</h3>
+      <p style="margin: 0; color: #9aa4b2">Start: ${series.startDate ?? '—'} | End: ${series.endDate ?? '—'}</p>
+      <p style="margin: 6px 0 0 0; color: #9aa4b2">Matches: ${series.matches ?? '—'}</p>
+      ${isActive ? '<span style="display:inline-block;margin-top:8px;padding:2px 8px;border-radius:999px;border:1px solid #2dbf5c;color:#b8f3cd;font-weight:600;font-size:.8rem">ACTIVE NOW</span>' : ''}
     `;
+
     container.appendChild(tile);
   });
+
+  // ... after the forEach (when done)
+  diagEl && (diagEl.textContent = `Series shown: ${Math.min(payload.data.length, 10)}`);
+
 }
+
+
 
 // ---- boot ----
 // Make sure your <script> tag is at the end of <body> or has defer, so #series-container exists.
