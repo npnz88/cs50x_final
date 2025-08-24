@@ -9,3 +9,7 @@ The goal
     b. Current teams that will/are playing
     c. Scores of match that are being played
     d. City, Country, Stadium names
+
+Access: https://npnz88.github.io/cs50x_final/
+
+Note that this display of data is for educational purposes only. Data can be sourced using free apis from https://cricketdata.org
