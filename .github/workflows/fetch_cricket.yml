@@ -3,8 +3,7 @@ name: Fetch cricket series JSON
 on:
   workflow_dispatch: {}
   schedule:
-    # every 2 hours — tweak as needed
-    - cron: "0 */2 * * *"
+    - cron: "0 0 * * *"
 
 permissions:
   contents: write
