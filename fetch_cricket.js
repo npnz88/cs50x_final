@@ -3,26 +3,97 @@ const fs = require('fs');
 const path = require('path');
 
 const API_KEY = process.env.CRICAPI_KEY;
-if (!API_KEY) {
-  console.error('Missing CRICAPI_KEY env var.');
-  process.exit(1);
-}
 
-const API_URL = `https://api.cricapi.com/v1/series?apikey=${API_KEY}&offset=0`;
+const API_URL = API_KEY
+  ? `https://api.cricapi.com/v1/matches?apikey=${API_KEY}&offset=0`
+  : null;
 
 const OUT_DIR = 'data';
-const OUT_FILE = path.join(OUT_DIR, 'series.json');
-const RAW_FILE = path.join(OUT_DIR, 'series_raw.json');
+const RAW_FILE = path.join(OUT_DIR, 'matches_raw.json');
+const OUT_FILE = path.join(OUT_DIR, 'upcoming_matches.json');
 
-async function main() {
+function parseDate(value) {
+  if (!value) return null;
+  const attempt = new Date(value);
+  if (!Number.isNaN(attempt?.getTime())) return attempt;
+  const gmt = new Date(`${value}Z`);
+  if (!Number.isNaN(gmt?.getTime())) return gmt;
+  return null;
+}
+
+function normaliseMatch(match) {
+  const matchTypeRaw = String(
+    match?.matchType || match?.type || match?.format || ''
+  ).toLowerCase();
+
+  const teams = Array.isArray(match?.teams)
+    ? match.teams.filter(Boolean)
+    : [match?.team1, match?.team2].filter(Boolean);
+
+  const venue = [match?.venue?.name || match?.venue, match?.venue?.city, match?.venue?.country]
+    .filter(Boolean)
+    .join(', ');
+
+  const dt = parseDate(match?.dateTimeGMT || match?.dateTime || match?.date);
+
+  return {
+    id: match?.id || match?.matchId || match?.unique_id || null,
+    name:
+      match?.name ||
+      [match?.series?.name || match?.seriesName || match?.series, match?.matchNumber || match?.matchDesc]
+        .filter(Boolean)
+        .join(' - '),
+    series: match?.series?.name || match?.seriesName || match?.series || null,
+    matchType: matchTypeRaw,
+    status: match?.status || match?.gameState || null,
+    teams,
+    venue: venue || null,
+    dateTimeGMT: match?.dateTimeGMT || match?.dateTime || match?.date || null,
+    utcTimestamp: dt ? dt.toISOString() : null,
+  };
+}
+
+function selectUpcoming(list) {
+  const now = new Date();
+
+  const grouped = { test: [], odi: [] };
+
+  list.forEach((item) => {
+    const normalised = normaliseMatch(item);
+    if (!normalised.utcTimestamp) return;
+    const start = new Date(normalised.utcTimestamp);
+    if (Number.isNaN(start.getTime()) || start <= now) return;
+
+    const key = normalised.matchType;
+    if (!key) return;
+
+    if (key.includes('test')) grouped.test.push({ raw: item, normalised, start });
+    if (key.includes('odi')) grouped.odi.push({ raw: item, normalised, start });
+  });
+
+  const pick = (entries) => {
+    if (!entries.length) return null;
+    entries.sort((a, b) => a.start - b.start);
+    return entries[0].normalised;
+  };
+
+  return {
+    test: pick(grouped.test),
+    odi: pick(grouped.odi),
+  };
+}
+
+async function fetchFromApi() {
+  if (!API_URL) {
+    throw new Error('Missing CRICAPI_KEY env var; cannot contact CricAPI');
+  }
+
   console.log('[fetch] GET', API_URL);
-
   const r = await fetch(API_URL, { headers: { Accept: 'application/json' }, cache: 'no-store' });
   console.log('[fetch] HTTP', r.status);
 
   const text = await r.text();
 
-  // Always write raw for debugging
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.writeFileSync(RAW_FILE, text);
   console.log(`[fetch] wrote raw payload to ${RAW_FILE} (${text.length} bytes)`);
@@ -39,27 +110,42 @@ async function main() {
     throw new Error(`API error: ${payload?.message || 'unknown'}`);
   }
 
-  // Try several possible shapes
-  let list = null;
-  if (Array.isArray(payload?.data)) list = payload.data;
-  else if (Array.isArray(payload?.response)) list = payload.response;
-  else if (Array.isArray(payload?.data?.series)) list = payload.data.series;
-  else if (payload?.records && Array.isArray(payload.records)) list = payload.records;
+  let matches = null;
+  if (Array.isArray(payload?.data)) matches = payload.data;
+  else if (Array.isArray(payload?.matches)) matches = payload.matches;
+  else if (Array.isArray(payload?.response)) matches = payload.response;
+  else if (Array.isArray(payload?.records)) matches = payload.records;
 
-  if (!Array.isArray(list)) {
-    // Include top-level keys to help debugging
+  if (!Array.isArray(matches)) {
     console.error('[fetch] Unexpected payload shape. Top-level keys:', Object.keys(payload || {}));
-    console.error('[fetch] Example payload snippet:', JSON.stringify(payload, null, 2).slice(0, 400));
-    throw new Error('No series array found in payload; see data/series_raw.json');
+    throw new Error('No matches array found in payload; see data/matches_raw.json');
   }
 
-  // Trim but keep enough for the page
-  const out = { data: list.slice(0, 100), fetchedAt: new Date().toISOString() };
-  fs.writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));
-  console.log(`[fetch] wrote ${OUT_FILE} with ${out.data.length} items`);
+  return {
+    fetchedAt: new Date().toISOString(),
+    source: API_URL,
+    matches: selectUpcoming(matches),
+  };
 }
 
-main().catch((e) => {
-  console.error('Fetch failed:', e?.message || e);
+function writeOutput(payload) {
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+  fs.writeFileSync(OUT_FILE, JSON.stringify(payload, null, 2));
+  console.log(`[fetch] wrote ${OUT_FILE}`);
+}
+
+async function main() {
+  try {
+    const payload = await fetchFromApi();
+    writeOutput(payload);
+  } catch (error) {
+    const reason = error?.message || error;
+    const code = error?.code || error?.cause?.code;
+    console.error('Fetch failed:', reason, code ? `(${code})` : '');
+    throw error;
+  }
+}
+
+main().catch(() => {
   process.exit(1);
 });
