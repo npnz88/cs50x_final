@@ -1,0 +1,28 @@
+{
+  "fetchedAt": "2025-10-25T18:00:00.000Z",
+  "source": "https://api.cricapi.com/v1/matches",
+  "matches": {
+    "test": {
+      "id": "test-eng-ind-2025-03",
+      "name": "England tour of India 2025 - 3rd Test",
+      "series": "England in India Test Series 2025",
+      "matchType": "test",
+      "status": "Scheduled",
+      "teams": ["India", "England"],
+      "venue": "MA Chidambaram Stadium, Chennai, India",
+      "dateTimeGMT": "2025-11-18T04:00:00Z",
+      "utcTimestamp": "2025-11-18T04:00:00Z"
+    },
+    "odi": {
+      "id": "odi-aus-sa-2025-01",
+      "name": "Australia vs South Africa 1st ODI",
+      "series": "Australia tour of South Africa 2025",
+      "matchType": "odi",
+      "status": "Scheduled",
+      "teams": ["South Africa", "Australia"],
+      "venue": "Kingsmead, Durban, South Africa",
+      "dateTimeGMT": "2025-11-22T12:00:00Z",
+      "utcTimestamp": "2025-11-22T12:00:00Z"
+    }
+  }
+}

@@ -4,33 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cricket Dashboard</title>
-  <!-- optional: if style.css 404s, comment this out and use inline styles -->
-  <link rel="stylesheet" href="./style.css?v=2">
+  <link rel="stylesheet" href="./style.css?v=3">
   <style>
     /* fallback styles to keep things readable even without style.css */
     body { background:#0b0e14; color:#e6e8ee; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:0; }
     main { max-width: 980px; margin: 0 auto; padding: 16px; }
-    h1 { font-size: 1.6rem; margin: 24px 0; }
-    #series-container { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
-    .card { background:#141922; border:1px solid #2a2f3b; border-radius:12px; padding:12px 14px; }
-    .card.active { background:#113b1b; border-color:#2dbf5c; }
-    .badge { display:inline-block; margin-top:8px; padding:2px 8px; border-radius:999px; border:1px solid #2dbf5c; color:#b8f3cd; font-weight:600; font-size:.8rem; }
+    h1 { font-size: 1.8rem; margin: 24px 0 12px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; }
+    .card { background:#141922; border:1px solid #2a2f3b; border-radius:12px; padding:16px 18px; }
+    .card h2 { margin:0 0 10px; font-size:1.2rem; }
+    .muted { color:#9aa4b2; }
+    .badge { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:3px 10px; border-radius:999px; border:1px solid #2dbf5c; color:#b8f3cd; font-weight:600; font-size:.8rem; }
     footer { margin: 24px 0 12px; color:#9aa4b2; }
   </style>
 </head>
 <body>
   <main>
-    <h1>🏏 Current / Recent Cricket Series</h1>
+    <h1>🏏 Upcoming International Cricket</h1>
+    <p class="muted">The dashboard highlights the next confirmed Test and One Day International fixtures pulled from the free CricAPI feed.</p>
 
-    <!-- ✅ tiles render here -->
-    <div id="series-container"></div>
+    <section class="grid" id="matches-container" aria-live="polite"></section>
 
     <footer>
-      <small>Data via CricAPI · <span id="diag">Loading...</span></small>
+      <small><span id="diag">Loading fixtures…</span></small>
     </footer>
   </main>
 
-  <!-- ✅ load js (defer + cache-buster) -->
-  <script src="./script.js?v=10" defer></script>
+  <script src="./script.js?v=11" defer></script>
 </body>
 </html>
