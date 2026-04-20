@@ -1,24 +1,63 @@
-# cs50x_final_project
+# NZ Grocery Price Tracker
+### CS50x 2026 — Final Project
 
-## TL;DR
+## 📌 Overview
+A Python ETL pipeline that scrapes grocery prices from Woolworths NZ,
+Pak'nSave, and New World, stores snapshots over time in SQLite, and
+visualises price comparisons via a Flask web dashboard.
 
-The refreshed dashboard focuses on surfacing the next confirmed Test and One Day International fixtures so that visitors can quickly understand what elite cricket is coming up next.
+Built as the CS50x final project by [@npnz88](https://github.com/npnz88).
 
-### Goals
+---
 
-1. Practise working with a free cricket API feed.
-2. Present upcoming Test and ODI matches in a compact, visually rich layout.
-3. Make it clear where and when each highlighted match will be played.
+## 🛠️ Tech Stack
+| Layer | Technology |
+|-------|-----------|
+| Scraping | Python, Playwright |
+| ETL | Python |
+| Database | SQLite |
+| Web App | Flask |
+| Frontend | HTML, CSS, Chart.js |
 
-Access: https://npnz88.github.io/cs50x_final/
+---
 
-> ℹ️ The project is for educational purposes. Fixture data is retrieved from the free tier of [CricAPI](https://www.cricapi.com/).
+## 📁 Project Structure
+- `scraper/` — one file per store, extracts product names & prices
+- `etl/` — cleans and normalises data before storing
+- `database/` — SQLite database storing price snapshots over time
+- `app/` — Flask app serving the comparison dashboard
 
-## Local development
+---
 
-1. Install dependencies once with `npm install` (only `node-fetch` is required for the fetch script).
-2. Create a `.env` file (or export the variable in your shell) with `CRICAPI_KEY=<your_api_key>`.
-3. Run `node fetch_cricket.js` to pull the latest fixtures; a JSON snapshot is written to `data/upcoming_matches.json`.
-4. Open `index.html` in a browser (or use any static server) to view the dashboard.
+## 🚀 How to Run
 
-If the network call fails or no upcoming fixtures exist for a format, the UI will show a friendly empty state so the page remains informative.
+```bash
+# Install dependencies
+pip install -r requirements.txt
+playwright install chromium
+
+# Run scrapers
+python scraper/woolworths.py
+python scraper/paknsave.py
+python scraper/newworld.py
+
+# Launch dashboard
+flask --app app/app.py run
+```
+
+---
+
+## 💡 Design Decisions
+*(Fill this in as you build — explain why you made key choices)*
+
+---
+
+## 🤖 AI Usage
+This project was built with guidance from Claude (Anthropic) as per
+CS50x academic honesty policy for final projects. All code written
+and understood by the student.
+
+---
+
+## 📸 Demo
+*(Add screenshot or link to your 3-minute video here)*
