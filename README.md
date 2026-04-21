@@ -11,13 +11,6 @@ Built as the CS50x final project by [@npnz88](https://github.com/npnz88).
 ---
 
 ## 🛠️ Tech Stack
-| Layer | Technology |
-|-------|-----------|
-| Scraping | Python, Playwright |
-| ETL | Python |
-| Database | SQLite |
-| Web App | Flask |
-| Frontend | HTML, CSS, Chart.js |
 
 ---
 
