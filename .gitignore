@@ -1,3 +1,7 @@
-*.txt
-random.txt
-random123.txt
+venv/
+__pycache__/
+*.pyc
+database/prices.db
+.DS_Store
+node_modules/
+.env
